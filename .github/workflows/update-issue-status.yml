@@ -1,0 +1,30 @@
+name: Update Issue Status
+
+on:
+  create:
+    ref_type: branch
+
+jobs:
+  update-issue:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Update issue status to In Progress
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Lấy tên nhánh được tạo
+        BRANCH_NAME=${GITHUB_REF##*/}
+        
+        # Lấy số issue từ tên nhánh (giả sử tên nhánh có định dạng 'issue-<issue_number>')
+        ISSUE_NUMBER=${BRANCH_NAME#issue-}
+
+        # Cập nhật trạng thái của issue
+        curl -X PATCH \
+          -H "Authorization: token $GITHUB_TOKEN" \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/${{ github.repository }}/issues/$ISSUE_NUMBER \
+          -d '{"state": "in progress"}'
